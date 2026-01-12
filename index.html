@@ -77,7 +77,7 @@
 </head>
 <body>
 
-    <a id="hidden-link" href="#" style="display:none;"></a>
+    <a id="hidden-link" href="#" style="display:none;" rel="noreferrer"></a>
 
     <div class="tap-zone" id="clickArea"></div>
 
@@ -102,11 +102,45 @@
         let targetUrl = params.get('url');
         let verified = false;
 
-        // FIX 3: URL Cleaner (Decode + Remove m=1)
+        // ==========================================
+        // 🔐 SECRET KEY (Must match WordPress PHP)
+        // ==========================================
+        const SECRET_KEY = "MySuperSecretKey2025"; 
+
+        // 🔥 HIGH CPC KEYWORDS LIST
+        const highPayingKeys = [
+            "mesothelioma_attorney_assistance",
+            "donate_car_tax_credit_usa",
+            "crypto_trading_premium_account",
+            "business_loan_bad_credit_approval",
+            "online_degree_cyber_security_mba",
+            "structured_settlement_annuity_companies"
+        ];
+
+        // --- ENCRYPTION LOGIC (XOR) ---
+        function encryptData(text, key) {
+            let result = "";
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return btoa(result);
+        }
+
+        // --- URL PREPARER ---
         if (targetUrl) {
             try {
+                // 1. Clean URL
                 targetUrl = decodeURIComponent(targetUrl);
-                targetUrl = targetUrl.replace(/[?&]m=1/, ''); 
+                targetUrl = targetUrl.replace(/[?&]m=1/, '');
+                
+                // 2. Select & Encrypt Keyword
+                let rawKey = highPayingKeys[Math.floor(Math.random() * highPayingKeys.length)];
+                let securePayload = encryptData(rawKey, SECRET_KEY);
+                
+                // 3. Append Auth & Token to URL
+                let separator = targetUrl.includes('?') ? '&' : '?';
+                targetUrl = targetUrl + separator + 'auth=verified&token=' + securePayload;
+
             } catch (e) { console.log('URL Error'); }
         }
 
@@ -115,7 +149,7 @@
             verified = true;
 
             if (targetUrl) {
-                // UI Animation (Same as before)
+                // UI Animation (Original Style)
                 document.getElementById('statusTitle').innerText = "Verifying...";
                 document.getElementById('statusMsg').innerText = "Connection secured. Redirecting...";
                 document.getElementById('hint').style.display = 'none';
@@ -128,15 +162,11 @@
                 // Progress Bar
                 setTimeout(() => { document.getElementById('progressBar').style.width = "100%"; }, 100);
 
-                // Add Auth Param
-                const separator = targetUrl.includes('?') ? '&' : '?';
-                const finalDest = targetUrl + separator + 'auth=verified';
-
-                // FIX 4: Real Click Simulation (Referrer Pass Hoga)
+                // REAL CLICK SIMULATION (Fixes Direct Traffic)
                 setTimeout(() => {
                     let link = document.getElementById('hidden-link');
-                    link.href = finalDest;
-                    link.click(); // Browser ko lagega user ne click kiya hai
+                    link.href = targetUrl;
+                    link.click(); 
                 }, 800);
             } else {
                 document.getElementById('statusTitle').innerText = "Link Error";
@@ -145,7 +175,7 @@
             }
         }
 
-        // Trigger on ANY activity (Mobile & Desktop)
+        // Trigger on ANY activity
         document.getElementById('clickArea').addEventListener('click', verifyAndRedirect);
         document.getElementById('clickArea').addEventListener('touchstart', verifyAndRedirect, {passive: true});
         
