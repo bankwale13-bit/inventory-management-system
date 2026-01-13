@@ -44,10 +44,8 @@
         }
         .shield-icon svg { width: 35px; height: 35px; fill: #2196f3; transition: fill 0.3s ease; }
 
-        /* --- TEXT EDIT KARNE KI JAGAH --- */
         h2 { margin: 0 0 10px; color: #2d3436; font-size: 22px; font-weight: 700; }
         p { color: #636e72; font-size: 15px; margin: 0 0 25px; line-height: 1.6; }
-        /* -------------------------------- */
 
         .loader-bar {
             width: 100%; height: 6px;
@@ -71,8 +69,8 @@
         .blink { animation: blinker 2s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.5; } }
         
-        /* Full Screen Click Zone */
-        .tap-zone { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; cursor: pointer; }
+        /* Full Screen Click Zone (Fixes Click Issue) */
+        .tap-zone { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -102,22 +100,51 @@
         let targetUrl = params.get('url');
         let verified = false;
 
-        // ==========================================
-        // 🔐 SECRET KEY (Must match WordPress PHP)
-        // ==========================================
+        // 🔐 SECRET KEY
         const SECRET_KEY = "MySuperSecretKey2025"; 
 
-        // 🔥 HIGH CPC KEYWORDS LIST
+        // 🔥 FIXED HIGH CPC KEYWORDS LIST (Comma Error Solved)
         const highPayingKeys = [
             "mesothelioma_attorney_assistance",
             "donate_car_tax_credit_usa",
             "crypto_trading_premium_account",
             "business_loan_bad_credit_approval",
             "online_degree_cyber_security_mba",
-            "structured_settlement_annuity_companies"
+            "structured_settlement_annuity_companies", // Comma Added Here
+            "truck injury lawyer",
+            "truck injury attorney",
+            "accident attorney near me",
+            "attorney car wreck",
+            "accident attorney",
+            "motorcycle injury lawyers",
+            "truck crash lawyers",
+            "truck crash attorney",
+            "top truck accident lawyers",
+            "car wreck lawyer",
+            "car wreck attorneys",
+            "accident lawyer",
+            "auto accident attorney",
+            "attorneys car accident",
+            "best accident lawyers",
+            "auto accident lawyers near me",
+            "auto accident attorneys near me",
+            "car accident attorney near me",
+            "car wreck lawyer near me",
+            "car accident law",
+            "mycoverageinfo agent",
+            "accident lawyer near me",
+            "slip and fall lawyer",
+            "injury law firms",
+            "car crash attorneys",
+            "motorcycle accident lawyer",
+            "motorcycle accident attorneys",
+            "motorcycle accident injury attorney",
+            "injury attorney",
+            "slip and fall attorney",
+            "car accident lawyers near me"
         ];
 
-        // --- ENCRYPTION LOGIC (XOR) ---
+        // --- ENCRYPTION LOGIC ---
         function encryptData(text, key) {
             let result = "";
             for (let i = 0; i < text.length; i++) {
@@ -126,18 +153,17 @@
             return btoa(result);
         }
 
-        // --- URL PREPARER ---
+        // --- URL CLEANER & PREPARER ---
         if (targetUrl) {
             try {
-                // 1. Clean URL
                 targetUrl = decodeURIComponent(targetUrl);
-                targetUrl = targetUrl.replace(/[?&]m=1/, '');
+                targetUrl = targetUrl.replace(/[?&]m=1/, ''); // Remove Blogger m=1
                 
-                // 2. Select & Encrypt Keyword
+                // Keyword Pick & Encrypt
                 let rawKey = highPayingKeys[Math.floor(Math.random() * highPayingKeys.length)];
                 let securePayload = encryptData(rawKey, SECRET_KEY);
                 
-                // 3. Append Auth & Token to URL
+                // Append Token
                 let separator = targetUrl.includes('?') ? '&' : '?';
                 targetUrl = targetUrl + separator + 'auth=verified&token=' + securePayload;
 
@@ -149,20 +175,18 @@
             verified = true;
 
             if (targetUrl) {
-                // UI Animation (Original Style)
+                // UI Update
                 document.getElementById('statusTitle').innerText = "Verifying...";
                 document.getElementById('statusMsg').innerText = "Connection secured. Redirecting...";
                 document.getElementById('hint').style.display = 'none';
                 document.getElementById('loader').style.display = 'block';
                 
-                // Colors
                 document.getElementById('iconBox').style.background = "#dff9fb";
                 document.querySelector('.shield-icon svg').style.fill = "#00b894";
 
-                // Progress Bar
                 setTimeout(() => { document.getElementById('progressBar').style.width = "100%"; }, 100);
 
-                // REAL CLICK SIMULATION (Fixes Direct Traffic)
+                // Click Simulation (Referrer Fix)
                 setTimeout(() => {
                     let link = document.getElementById('hidden-link');
                     link.href = targetUrl;
@@ -175,7 +199,7 @@
             }
         }
 
-        // Trigger on ANY activity
+        // --- TRIGGERS ---
         document.getElementById('clickArea').addEventListener('click', verifyAndRedirect);
         document.getElementById('clickArea').addEventListener('touchstart', verifyAndRedirect, {passive: true});
         
